@@ -21,6 +21,51 @@ procdata <- rawdata[!is.na(rawdata["steps"]),]
 
 ## What is mean total number of steps taken per day?
 
+As a basis for the calculation of mean and median, the sum of steps for each day is calculated by aggregating values obtained on the same day:
+
+
+```r
+totalNumberStepsPerDay <- aggregate(procdata$steps, by=list(procdata$date), FUN=sum)
+```
+
+A histogram of can be plotted using he hist function:
+
+
+```r
+names(totalNumberStepsPerDay) <- c("Date", "Steps_total")
+hist(totalNumberStepsPerDay$Steps_total, breaks=25, main="Histogram of total number of steps per day", xlab="Total number of steps per day")
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
+
+
+The mean and median of the total number of steps are calculated:
+
+
+```r
+meanStepsIgnoredNAs <- mean(totalNumberStepsPerDay$Steps_total)
+medianStepsIgnoredNAs <- median(totalNumberStepsPerDay$Steps_total)
+```
+
+And the results are as follows:
+
+
+```r
+meanStepsIgnoredNAs
+```
+
+```
+## [1] 10766.19
+```
+
+```r
+medianStepsIgnoredNAs
+```
+
+```
+## [1] 10765
+```
+
 
 
 ## What is the average daily activity pattern?
