@@ -66,6 +66,10 @@ img {
 
 <div id="loading-and-preprocessing-the-data" class="section level2">
 <h2>Loading and preprocessing the data</h2>
+<p>To load the data from the .csv file (which is located in a subfolder <code>activity/</code>) into a variable <code>rawdata</code>, the following command is used:</p>
+<pre class="r"><code>rawdata &lt;- read.csv(&quot;activity/activity.csv&quot;)</code></pre>
+<p>After loading the data, it has to be prepared for the following analyses by removing the NA values from the data:</p>
+<pre class="r"><code>procdata &lt;- rawdata[!is.na(rawdata[&quot;steps&quot;]),]</code></pre>
 </div>
 <div id="what-is-mean-total-number-of-steps-taken-per-day" class="section level2">
 <h2>What is mean total number of steps taken per day?</h2>
