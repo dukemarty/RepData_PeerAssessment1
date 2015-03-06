@@ -220,3 +220,42 @@ As these numbers show, there is not much difference whether one *does* ignore th
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+To analyze the differences in the activity patterns of weekdays and weekends, we first need an additional factor variable to differentiate between those days:
+
+
+```r
+dataWithDay <- cbind(filleddata, weekdays(as.POSIXct(filleddata$date)))
+levels(dataWithDay[,4]) <- c("weekday", "weekday","weekday", "weekday","weekday", "weekend", "weekend")
+names(dataWithDay)[4] <- "weekday?"
+```
+
+
+Using this new variable, we can now aggregate the steps in each five minute interval, once for weekdays and once for weekends (and adding a column again holding the factor 'weekday' or 'weekend'):
+
+
+```r
+fiveMinAvgWeekday <- cbind(aggregate(dataWithDay[dataWithDay$`weekday?`=="weekday",]$steps, by=list(dataWithDay[dataWithDay$`weekday?`=="weekday",]$interval), FUN=mean), "weekday")
+names(fiveMinAvgWeekday) <- c("interval", "steps_avg", "day")
+
+fiveMinAvgWeekend <- cbind(aggregate(dataWithDay[dataWithDay$`weekday?`=="weekend",]$steps, by=list(dataWithDay[dataWithDay$`weekday?`=="weekend",]$interval), FUN=mean), "weekend")
+names(fiveMinAvgWeekend) <- c("interval", "steps_avg", "day")
+```
+
+
+Finally, both aggregated data sets can be plotted as time series by first combining them into a single data set, and then plotting this data set using the lattice library, conditioned on the weekday:
+
+
+
+```r
+fiveMinAvgComp <- rbind(fiveMinAvgWeekday, fiveMinAvgWeekend)
+names(fiveMinAvgComp) <- c("interval", "steps_avg", "day")
+
+day.f <- factor(fiveMinAvgComp$day,levels=c("weekday", "weekend"))
+
+library(lattice)
+xyplot(fiveMinAvgComp[,2]~fiveMinAvgComp[,1] |day.f, main="Comparison of number of steps on weekdays and weekends", xlab="Interval", ylab="Number of steps", type="l", layout=c(1,2))
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-20-1.png) 
+
