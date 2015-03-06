@@ -35,7 +35,7 @@ A histogram of can be plotted using he hist function:
 
 ```r
 names(totalNumberStepsPerDay) <- c("Date", "Steps_total")
-hist(totalNumberStepsPerDay$Steps_total, breaks=25, main="Histogram of total number of steps per day", xlab="Total number of steps per day")
+hist(totalNumberStepsPerDay$Steps_total, breaks=40, main="Histogram of total number of steps per day", xlab="Total number of steps per day")
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
@@ -80,7 +80,7 @@ To analyze the daily activity pattern, we first have to calculate the average on
 fiveMinAvg <- aggregate(procdata$steps, by=list(procdata$interval), FUN=mean)
 ```
 
-Now we plot these average as a time series:
+Now we plot these averages as a time series:
 
 
 ```r
@@ -105,7 +105,7 @@ fiveMinAvg[which.max(fiveMinAvg$steps_avg),][1,1]
 <!--- ============================================================================= --->
 ## Inputing missing values
 
-The number of rows with missing values in the data set is (calculated similarly to :
+The number of rows with missing values in the data set is:
 
 
 ```r
@@ -117,17 +117,25 @@ length(rawdata[is.na(rawdata["steps"]),]$steps)
 ```
 
 
-To fill in the missing values, the NA will be replaced with the median of the missing time interval over all days. The filled data set is calculated like this:
+To fill in the missing values, I chose the strategy to replace the NA values with the mean of the missing time interval over all days. The filled data set is therefore calculated like this:
+
+1) First calculate means for all five minute periods:
 
 
 ```r
-fiveMinMedian <- aggregate(procdata$steps, by=list(procdata$interval), FUN=median)
-names(fiveMinMedian) <- c("interval", "steps_median")
+fiveMinMean <- aggregate(procdata$steps, by=list(procdata$interval), FUN=mean)
+names(fiveMinMean) <- c("interval", "steps_mean")
+```
 
+
+2) Replace each NA with the median of the respective 5min period:
+
+
+```r
 filleddata <- rawdata
 for (i in 1:nrow(filleddata)){
   if (is.na(filleddata[i, "steps"])){
-    filleddata[i, "steps"] <- fiveMinMedian[fiveMinMedian[,"interval"]==filleddata[i, "interval"], "steps_median"]
+    filleddata[i, "steps"] <- fiveMinMean[fiveMinMean[,"interval"]==filleddata[i, "interval"], "steps_mean"]
   }
 }
 ```
@@ -135,7 +143,7 @@ for (i in 1:nrow(filleddata)){
 
 ### Redo of total number of steps analysis steps
 
-To compare this new data with replaced NAs with the previously used data, the calculations and steps from previously is repeated with the new data.
+To compare this new data with replaced NAs with the previously used data, the calculations and steps from previously have to be repeated using the new data.
 
 
 First, calculate the sum of steps for each day and plot it as a histogram:
@@ -144,10 +152,10 @@ First, calculate the sum of steps for each day and plot it as a histogram:
 ```r
 totalNumberStepsPerDayReplNa <- aggregate(filleddata$steps, by=list(filleddata$date), FUN=sum)
 names(totalNumberStepsPerDayReplNa) <- c("Date", "Steps_total")
-hist(totalNumberStepsPerDayReplNa$Steps_total, breaks=25, main="Histogram of total number of steps per day (with replaced NAs)", xlab="Total number of steps per day")
+hist(totalNumberStepsPerDayReplNa$Steps_total, breaks=40, main="Histogram of total number of steps per day (with replaced NAs)", xlab="Total number of steps per day")
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-12-1.png) 
+![](PA1_template_files/figure-html/unnamed-chunk-13-1.png) 
 
 
 The mean and median of the total number of steps are calculated:
@@ -166,7 +174,7 @@ meanStepsReplacedNAs
 ```
 
 ```
-## [1] 9503.869
+## [1] 10766.19
 ```
 
 ```r
@@ -174,7 +182,7 @@ medianStepsReplacedNAs
 ```
 
 ```
-## [1] 10395
+## [1] 10766.19
 ```
 
 
@@ -191,7 +199,7 @@ stepMeans
 
 ```
 ##   Ignore_NAs Replaced_NAs 
-##    10766.189     9503.869
+##     10766.19     10766.19
 ```
 
 And the same for the medians:
@@ -205,33 +213,10 @@ stepMedians
 
 ```
 ##   Ignore_NAs Replaced_NAs 
-##        10765        10395
+##     10765.00     10766.19
 ```
 
-Apparently, mean as well as median are higher if the entries *with* an NA value are just ignored. When looking more deeply into the matter, one reason for this can be found: When ignoring the NA entries, there are whole days missing:
-
-
-```r
-length(totalNumberStepsPerDay$Date)
-```
-
-```
-## [1] 53
-```
-
-vs.
-
-
-```r
-length(totalNumberStepsPerDayReplNa$Date)
-```
-
-```
-## [1] 61
-```
-
-
-
+As these numbers show, there is not much difference whether one *does* ignore the NA values or one *replaces* them with the mean of the respective interval of the day.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
